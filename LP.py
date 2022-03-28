@@ -143,13 +143,18 @@ def getLPScheduling(data):
         for t in range(timeMax):
             if x[i, k][t].x > 0:
                 if isFullScheduled < 1:
+
                     isFullScheduled = x[i, k][t].x/lamda + isFullScheduled
+                    print(isFullScheduled)
                     t1 = t / lamda
                     t2 = (t + 1) / lamda
 
                     if isFullScheduled >= 1:
+                        print("nt2:" + str(t2))
                         remain = isFullScheduled - 1
-                        t2 = t2 - remain * lamda
+                        print("remain:"+str(remain))
+                        t2 = t2 - remain / x[i, k][t].x
+                        print("nowt2:" + str(t2))
                         data.flows[key].cct1 = t2
                         data.flows[key].cct2 = t2
                         isFullScheduled = 1

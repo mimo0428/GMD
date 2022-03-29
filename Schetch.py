@@ -1,8 +1,6 @@
 from invertCDF import getRamdomNumber
 from math import fabs
-
-# 全局变量
-timeMax = 10
+# from main import timeMax
 
 def isFloatEqual(xx,yy):
     if fabs(xx - yy) <= 1e6:
@@ -107,7 +105,7 @@ def calTime(data):
         w = data.flows[key].weight
         c1 = data.flows[key].cct1
         c2 = data.flows[key].cct2
-        allC1 += c1*w
+        allC1 += c1 * w
         allC2 += c2 * w
     print('cct1:'+str(allC1))
     print('cct2:' + str(allC2))

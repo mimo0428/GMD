@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from numpy import inf
 import networkx as nx
 import matplotlib.pyplot as plt
+from random import randint
 
 dist1 = [
     [0, 1, 99, 1, 99, 1],
@@ -38,6 +39,7 @@ def gene_topology_graphml(fp):
     # print(n_node)
     dist = np.array(np.zeros((n_node, n_node)))
     latency = np.array(np.zeros((n_node, n_node)))
+    bandwidth = np.array(np.zeros((n_node, n_node)))
     for edge in edges:
         x = int(str(edge).replace("\n", " ").split('"')[1])
         y = int(str(edge).replace("\n", " ").split('"')[3])
@@ -51,17 +53,18 @@ def gene_topology_graphml(fp):
         for j in range(n_node):
             if i != j:
                 if dist[i][j] == 1:
-                    g = (
-                        np.random.f(5, 13) * 50
-                    )  # 每条边的latency是随机确定的，你可以根据需要修改latency的生成方式
+                    # g = (
+                    #     np.random.f(5, 13) * 50
+                    # )  # 每条边的latency是随机确定的，你可以根据需要修改latency的生成方式
                     latency[i][j] = 1
+                    bandwidth[i][j] = randint(500,2000)
                     # print(g)
                 else:
                     latency[i][j] = 99
     # print("latency")
     # print(latency)
 
-    return latency, dist, n_node
+    return latency, dist, n_node, bandwidth
 
 
 def radius(dist, n_node, start):

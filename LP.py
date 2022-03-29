@@ -97,7 +97,8 @@ def getLPScheduling(data):
                 jj = p[1]
                 if ii > jj:
                     ii, jj = jj, ii
-                expr[ii][jj].addTerms(data.flows[key].demand, x[i, k][t])
+                if data.flows[key].demand > 0:
+                    expr[ii][jj].addTerms(data.flows[key].demand, x[i, k][t])
 
         for ii in range(len(data.bandwidth)):
             for jj in range(len(data.bandwidth)):
@@ -120,16 +121,17 @@ def getLPScheduling(data):
         if C[key].x > 0:
             print(C[key].VarName + ' = ', C[key].x)
 
-    for key in X.keys():
-        for t in range(timeMax):
-            if X[key][t].x > 0:
-                print(X[key][t].VarName + ' = ', X[key][t].x)
+    # for key in X.keys():
+    #     for t in range(timeMax):
+    #         if X[key][t].x > 0:
+    #             print(X[key][t].VarName + ' = ', X[key][t].x)
 
 
 
 ###########################################
 # stretch the LP schedule
     lamda = getRamdomNumber()
+    lamda = 0.5
     print("lambda:" + str(lamda))
 
     for key in data.flows:
@@ -140,22 +142,22 @@ def getLPScheduling(data):
         # 图3
         # 对所有流的所有时间段进行遍历
         for t in range(timeMax):
-            print("t:" + str(t))
+            # print("t:" + str(t))
             if x[i, k][t].x > 0:
-                print("x[i, k][t].x:" + ",i:"+ str(i) + ",k:" + str(k) + "," +  str(x[i, k][t].x))
+                # print("x[i, k][t].x:" + ",i:"+ str(i) + ",k:" + str(k) + "," +  str(x[i, k][t].x))
                 if isFullScheduled < 1:
 
                     isFullScheduled = x[i, k][t].x/lamda + isFullScheduled
-                    print("isFullScheduled:" + str(isFullScheduled))
+                    # print("isFullScheduled:" + str(isFullScheduled))
                     t1 = t / lamda
                     t2 = (t + 1) / lamda
 
                     if isFullScheduled >= 1:
-                        print("nt2:" + str(t2))
+                        # print("nt2:" + str(t2))
                         remain = isFullScheduled - 1
-                        print("remain:"+str(remain))
+                        # print("remain:"+str(remain))
                         t2 = t2 - remain / x[i, k][t].x
-                        print("nowt2:" + str(t2))
+                        # print("nowt2:" + str(t2))
                         data.flows[key].cct1 = t2
                         data.flows[key].cct2 = t2
                         isFullScheduled = 1
@@ -166,42 +168,42 @@ def getLPScheduling(data):
                     # 以时间为索引，存放流索引和在该时间调度的数据量
                     # print(data.allPath)
                     for p in data.flows[key].path:
-                        print(p)
-                        data.allPath[p].timeSet[t1, t2] = ((i, k), x[i, k][t].x)
+                        # print(p)
+                        data.allPath[p].timeSet[t1, t2, i, k] = ((i, k), x[i, k][t].x)
 
                 # x[i, k][t].x = 0
 
-        # 图4 直到没有改变，停止遍历
-        # 对每一条链路进行遍历：
-        # 如果有哪段时间为空，考虑将后面的时间段前移，判断其其他链路上的该段时间对于该流是否为空，如果是，将其前移
-        isChanged = 1
-        while isChanged:
-            isChanged = 0
-            for pij in data.allPath:
-                sortedTime = sorted(data.allPath[pij].timeSet.keys())  # 对时间进行排序
-                for t in range(len(sortedTime)):
-                    flow = data.allPath[pij].timeSet[sortedTime[t][0], sortedTime[t][1]][0]
-                    # 判断时间上是否有空余位置
-                    res = 0
-                    if t == 0:
-                        if not isFloatEqual(sortedTime[0][0], 0):
-                            t1 = 0
-                            t2 = sortedTime[0][0]
-                            res = checkCanForward(t1, t2, flow[0], flow[1], data)
+    # 图4 直到没有改变，停止遍历
+    # 对每一条链路进行遍历：
+    # 如果有哪段时间为空，考虑将后面的时间段前移，判断其其他链路上的该段时间对于该流是否为空，如果是，将其前移
+    isChanged = 1
+    while isChanged:
+        isChanged = 0
+        for pij in data.allPath:
+            sortedTime = sorted(data.allPath[pij].timeSet.keys())  # 对时间进行排序
+            for t in range(len(sortedTime)):
+                flow = data.allPath[pij].timeSet[sortedTime[t]][0]
+                # 判断时间上是否有空余位置
+                res = 0
+                if t == 0:
+                    if not isFloatEqual(sortedTime[0][0], 0):
+                        t1 = 0
+                        t2 = sortedTime[0][0]
+                        res = checkCanForward(t1, t2, flow[0], flow[1], data)
+                else:
+                    if not isFloatEqual(sortedTime[t-1][1], sortedTime[t][0]) and sortedTime[t][0] > sortedTime[t-1][1]:
+                        t1 = sortedTime[t-1][1]
+                        t2 = sortedTime[t][0]
+                        res = checkCanForward(t1, t2, flow[0], flow[1], data)
+                # 可以前移
+                if res == 1:
+                    isChanged = 1
+                    nt1 = t1
+                    oslot = sortedTime[t][1] - sortedTime[t][0]
+                    nslot = t2 - t1
+                    if nslot >= oslot:
+                        nt2 = t2 - (nslot - oslot)
                     else:
-                        if not isFloatEqual(sortedTime[t-1][1], sortedTime[t][0]) and sortedTime[t][0] > sortedTime[t-1][1]:
-                            t1 = sortedTime[t-1][1]
-                            t2 = sortedTime[t][0]
-                            res = checkCanForward(t1, t2, flow[0], flow[1], data)
-                    # 可以前移
-                    if res == 1:
-                        isChanged = 1
-                        nt1 = t1
-                        oslot = sortedTime[t][1] - sortedTime[t][0]
-                        nslot = t2 - t1
-                        if nslot >= oslot:
-                            nt2 = t2 - (nslot - oslot)
-                        else:
-                            nt2 = t2 + (oslot - nslot)
-                        MoveFoward(sortedTime[t][0], sortedTime[t][1], nt1, nt2, flow[0], flow[1], data)
-                        break
+                        nt2 = t2 + (oslot - nslot)
+                    MoveFoward(sortedTime[t][0], sortedTime[t][1], nt1, nt2, flow[0], flow[1], data)
+                    break

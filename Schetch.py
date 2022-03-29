@@ -3,7 +3,7 @@ from math import fabs
 # from main import timeMax
 
 def isFloatEqual(xx,yy):
-    if fabs(xx - yy) <= 1e6:
+    if fabs(xx - yy) <= 1e-6:
         return True
     return False
 
@@ -21,13 +21,18 @@ def checkCanForward(t1, t2, i, k, data):
 
 def MoveFoward(ot1, ot2, nt1, nt2, i, k, data):
     data.flows[i, k].schedule[nt1, nt2] = data.flows[i, k].schedule[ot1, ot2]
-    data.flows[i, k].schedule.pop((ot1, ot2))
+
     if data.flows[i, k].cct2 > nt2:
         data.flows[i, k].cct2 = nt2
 
+    index = 1
     for p in data.flows[i, k].path:
-        data.allPath[p].timeSet.pop((ot1, ot2))
-        data.allPath[p].timeSet[nt1, nt2] = ((i, k), data.flows[i, k].schedule[ot1, ot2])
+        if index == 1:
+            index = 0
+            del data.allPath[p].timeSet[ot1, ot2, i, k]
+        data.allPath[p].timeSet[nt1, nt2, i, k] = ((i, k), data.flows[i, k].schedule[ot1, ot2])
+
+    data.flows[i, k].schedule.pop((ot1, ot2))
 
 # def stretchLp(data):
 #     # stretch the LP schedule
@@ -105,6 +110,8 @@ def calTime(data):
         w = data.flows[key].weight
         c1 = data.flows[key].cct1
         c2 = data.flows[key].cct2
+        print(key)
+        print("c1: " + str(c1) + ",c2: " + str(c2) + ",weight:" + str(w))
         allC1 += c1 * w
         allC2 += c2 * w
     print('cct1:'+str(allC1))

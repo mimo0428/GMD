@@ -179,8 +179,8 @@ def getData(n_node):
             if p1 in flowPath or p2 in flowPath:
                 s1 = flow_row["dc"]
                 s2 = flow_row["app"]
-                if s1 > s2:
-                    s1, s2 = s2, s1
+                # if s1 > s2:
+                #     s1, s2 = s2, s1
                 passFlow = (s1, s2)
                 subPath.flows.append(passFlow)
         t1 = int(sourthPath)

@@ -25,7 +25,7 @@ def getLPScheduling(data):
             name = 'X_' + str(k) + '(' + str(t) + ')'
             X[k][t] = m.addVar(0, 1, vtype=GRB.CONTINUOUS, name=name)  # 定义访问时间为连续变量
             name = "XX_" + str(k) + "(" + str(t) + ")"
-            XX[k][t] = m.addVar(0, 1, vtype=GRB.CONTINUOUS, name='name')
+            XX[k][t] = m.addVar(0, 1, vtype=GRB.CONTINUOUS, name=name)
 
     for key in data.flows:
         i = key[0]

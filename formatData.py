@@ -93,7 +93,8 @@ def preData(res, dist, n_node):
     writer = pd.ExcelWriter(excelPath)
     df_app.to_excel(excel_writer=writer, sheet_name="application", index=False)
     df_flow.to_excel(excel_writer=writer, sheet_name="flows", index=False)
-    df_bandwidth.to_excel(excel_writer=writer, sheet_name="bandwidth", index=False)
+    df_bandwidth.to_excel(excel_writer=writer,
+                          sheet_name="bandwidth", index=False)
     writer.save()
     return 0
 
@@ -172,9 +173,20 @@ def getData(n_node):
         for flow_index, flow_row in df_flow.iterrows():
             flowPath = flow_row["path"]
             if p1 in flowPath or p2 in flowPath:
-                passFlow = (flow_row["dc"], flow_row["app"])
+                s1 = flow_row["dc"]
+                s2 = flow_row["app"]
+                if s1 > s2:
+                    s1, s2 = s2, s1
+                passFlow = (s1, s2)
                 subPath.flows.append(passFlow)
-        data.allPath[p1] = subPath
+        t1 = int(sourthPath)
+        t2 = int(destinationPath)
+        if t1 > t2:
+            t1, t2 = t2, t1
+        pathIndex = (t1, t2)
+        print(pathIndex)
+        print(subPath.flows)
+        data.allPath[pathIndex] = subPath
         # print(subPath.flows)
     data.bandwidth = bandwidth
     # print(data.bandwidth)
@@ -188,15 +200,15 @@ def getData(n_node):
     #     print(data.application[index].weight)
     #     print("----")
 
-    for index in data.flows:
-        print(data.flows[index].app)
-        print(data.flows[index].dc)
-        print(data.flows[index].significance)
-        print(data.flows[index].iterationDi)
-        print(data.flows[index].weight)
-        print(data.flows[index].demand)
-        print(data.flows[index].path)
-        print("----")
+    # for index in data.flows:
+    #     print(data.flows[index].app)
+    #     print(data.flows[index].dc)
+    #     print(data.flows[index].significance)
+    #     print(data.flows[index].iterationDi)
+    #     print(data.flows[index].weight)
+    #     print(data.flows[index].demand)
+    #     print(data.flows[index].path)
+    #     print("----")
 
     # for index in data.allPath:
     #     print(data.allPath[index].flows)

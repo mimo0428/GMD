@@ -10,11 +10,12 @@ XX = {}
 C = {}  # 定义字典用来存放决策变量
 
 # 得到调度方案
+
+
 def getLPScheduling(data):
     # Create a new model
     m = Model("scheduling")
     # 定义决策变量，并加入模型中
-
 
     for k in data.existApplication:
         name = 'C_' + str(k)
@@ -25,7 +26,8 @@ def getLPScheduling(data):
 
         for t in range(timeMax):
             name = 'X_' + str(k) + '(' + str(t) + ')'
-            X[k][t] = m.addVar(0, 1, vtype=GRB.CONTINUOUS, name=name)  # 定义访问时间为连续变量
+            X[k][t] = m.addVar(0, 1, vtype=GRB.CONTINUOUS,
+                               name=name)  # 定义访问时间为连续变量
             name = "XX_" + str(k) + "(" + str(t) + ")"
             XX[k][t] = m.addVar(0, 1, vtype=GRB.CONTINUOUS, name='name')
 
@@ -33,11 +35,10 @@ def getLPScheduling(data):
         i = key[0]
         k = key[1]
 
-
-        x[i,k] = {}
+        x[i, k] = {}
         for t in range(timeMax):
             name = 'x_' + str(i) + '_' + str(k) + '(' + str(t) + ')'
-            x[i,k][t] = m.addVar(0, 1, vtype=GRB.CONTINUOUS, name=name)
+            x[i, k][t] = m.addVar(0, 1, vtype=GRB.CONTINUOUS, name=name)
 
     #  目标函数
     # 首先定义一个线性表达式
@@ -58,7 +59,8 @@ def getLPScheduling(data):
             # 约束系数与决策变量相乘
             expr.addTerms(1, x[i, k][t])
         # 将约束加入模型
-        m.addConstr(expr == 1, name='flow_full_scheduled_' + str(i) + '_' + str(k))
+        m.addConstr(expr == 1, name='flow_full_scheduled_' +
+                    str(i) + '_' + str(k))
 
     # constraint 2
     for k in data.existApplication:
@@ -76,7 +78,8 @@ def getLPScheduling(data):
                         expr2.addTerms(1, x[i, tk][tt])
                     # print('--')
                     # print(k, t, i, tk, tt)
-                    m.addConstr(expr1 <= expr2, name='coflow_full_scheduled_' + str(i) + '_' + str(k))
+                    m.addConstr(
+                        expr1 <= expr2, name='coflow_full_scheduled_' + str(i) + '_' + str(k))
 
     # constraint 3
     for k in data.existApplication:
@@ -84,13 +87,15 @@ def getLPScheduling(data):
         expr66.addTerms(1, C[k])
         expr6 = LinExpr(0)
         for t in range(timeMax):
-            m.addConstr(XX[k][t] == 1 - X[k][t], name="C_constraint" + "_" + str(k))
+            m.addConstr(XX[k][t] == 1 - X[k][t],
+                        name="C_constraint" + "_" + str(k))
             expr6.addTerms(1, XX[k][t])
         m.addConstr(1 + expr6 <= expr66, name='C_constraint' + '_' + str(k))
 
     # constraint 6
     for t in range(timeMax):
-        expr = [[LinExpr(0) for i in range(len(data.bandwidth))] for j in range(len(data.bandwidth))]
+        expr = [[LinExpr(0) for i in range(len(data.bandwidth))]
+                for j in range(len(data.bandwidth))]
         for key in data.flows:
             i = key[0]
             k = key[1]
@@ -105,7 +110,6 @@ def getLPScheduling(data):
             for jj in range(len(data.bandwidth)):
                 m.addConstr(expr[ii][jj] <= data.bandwidth[ii][jj],
                             name='C_constraint path' + str(ii) + '_' + str(jj) + 'at time ' + str(t))
-
 
     # 求解
     m.optimize()
@@ -126,7 +130,6 @@ def getLPScheduling(data):
         for t in range(timeMax):
             if X[key][t].x > 0:
                 print(X[key][t].VarName + ' = ', X[key][t].x)
-
 
 
 ###########################################
@@ -164,7 +167,8 @@ def getLPScheduling(data):
                     # 将调度信息存放到所有该流经过的路径
                     # 以时间为索引，存放流索引和在该时间调度的数据量
                     for p in data.flows[key].path:
-                        data.allPath[p].timeSet[t1, t2] = ((i, k), x[i, k][t].x)
+                        data.allPath[p].timeSet[t1, t2] = (
+                            (i, k), x[i, k][t].x)
 
                 # x[i, k][t].x = 0
 
@@ -175,20 +179,24 @@ def getLPScheduling(data):
         while isChanged:
             isChanged = 0
             for pij in data.allPath:
-                sortedTime = sorted(data.allPath[pij].timeSet.keys())  # 对时间进行排序
+                sortedTime = sorted(
+                    data.allPath[pij].timeSet.keys())  # 对时间进行排序
                 for t in range(len(sortedTime)):
-                    flow = data.allPath[pij].timeSet[sortedTime[t][0], sortedTime[t][1]][0]
+                    flow = data.allPath[pij].timeSet[sortedTime[t]
+                                                     [0], sortedTime[t][1]][0]
                     # 判断时间上是否有空余位置
                     if t == 0:
                         if not isFloatEqual(sortedTime[0][0], 0):
                             t1 = 0
                             t2 = sortedTime[0][0]
-                            res = checkCanForward(t1, t2, flow[0], flow[1], data)
+                            res = checkCanForward(
+                                t1, t2, flow[0], flow[1], data)
                     else:
                         if not isFloatEqual(sortedTime[t-1][1], sortedTime[t][0]) and sortedTime[t][0] > sortedTime[t-1][1]:
                             t1 = sortedTime[t-1][1]
                             t2 = sortedTime[t][0]
-                            res = checkCanForward(t1, t2, flow[0], flow[1], data)
+                            res = checkCanForward(
+                                t1, t2, flow[0], flow[1], data)
                     # 可以前移
                     if res == 1:
                         isChanged = 1
@@ -199,5 +207,6 @@ def getLPScheduling(data):
                             nt2 = t2 - (nslot - oslot)
                         else:
                             nt2 = t2 + (oslot - nslot)
-                        MoveFoward(sortedTime[t][0], sortedTime[t][1], nt1, nt2, flow[0], flow[1], data)
+                        MoveFoward(
+                            sortedTime[t][0], sortedTime[t][1], nt1, nt2, flow[0], flow[1], data)
                         break

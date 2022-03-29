@@ -145,7 +145,11 @@ def getData(n_node):
         for subFlowData in subFlowPath:
             subFlowData = subFlowData.replace(")", "").replace("(", "")
             subFlowData = subFlowData.split(",")
-            subFlow.append((int(subFlowData[0]), int(subFlowData[1])))
+            s1 = int(subFlowData[0])
+            s2 = int(subFlowData[1])
+            if s1 > s2:
+                s1, s2 = s2, s1
+            subFlow.append((s1, s2))
         flow.path = subFlow
         flow.significance = row["significance"]
         flow.iterationDi = row["iterationDi"]

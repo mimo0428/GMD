@@ -131,7 +131,7 @@ def getLPScheduling(data):
 ###########################################
 # stretch the LP schedule
     lamda = getRamdomNumber()
-    lamda = 0.5
+    # lamda = 0.5
     print("lambda:" + str(lamda))
 
     for key in data.flows:
@@ -162,7 +162,7 @@ def getLPScheduling(data):
                         data.flows[key].cct2 = t2
                         isFullScheduled = 1
 
-                    data.flows[key].schedule[t1, t2] = x[i, k][t].x
+                    data.flows[key].schedule[t1, t2, i, k] = x[i, k][t].x
 
                     # 将调度信息存放到所有该流经过的路径
                     # 以时间为索引，存放流索引和在该时间调度的数据量

@@ -14,13 +14,13 @@ def checkCanForward(t1, t2, i, k, data):
         ii = p[0]
         jj = p[1]
         for time in data.allPath[p].timeSet:
-            if time[0] < t1 < time[1] or time[0] < t2 < time[1]:
+            if time[0] < t1 < time[1] or time[0] < t2 < time[1] or (time[0] == t1 and t2 == time[1]):
                 canMoveForward = 0
                 return canMoveForward
     return canMoveForward
 
 def MoveFoward(ot1, ot2, nt1, nt2, i, k, data):
-    data.flows[i, k].schedule[nt1, nt2] = data.flows[i, k].schedule[ot1, ot2]
+    data.flows[i, k].schedule[nt1, nt2, i, k] = data.flows[i, k].schedule[ot1, ot2,i ,k]
 
     if data.flows[i, k].cct2 > nt2:
         data.flows[i, k].cct2 = nt2
@@ -30,9 +30,9 @@ def MoveFoward(ot1, ot2, nt1, nt2, i, k, data):
         if index == 1:
             index = 0
             del data.allPath[p].timeSet[ot1, ot2, i, k]
-        data.allPath[p].timeSet[nt1, nt2, i, k] = ((i, k), data.flows[i, k].schedule[ot1, ot2])
+        data.allPath[p].timeSet[nt1, nt2, i, k] = ((i, k), data.flows[i, k].schedule[ot1, ot2,i ,k])
 
-    data.flows[i, k].schedule.pop((ot1, ot2))
+    data.flows[i, k].schedule.pop((ot1, ot2, i, k))
 
 # def stretchLp(data):
 #     # stretch the LP schedule

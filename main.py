@@ -6,7 +6,7 @@ from formatData import preData, getData, Application, Flow, Path, Data
 import os
 
 # 全局变量
-timeMax = 10
+timeMax = 100
 
 fp = "./archive/Epoch.graphml"
 
